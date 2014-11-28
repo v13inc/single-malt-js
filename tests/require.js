@@ -2,8 +2,16 @@ var Test = require('../lib/test.js');
 var Require = require('../lib/require.js');
 
 Test.file('require.js', function() {
-  var funcCalled = false;
   var func = function() { funcCalled = true };
+  var testExports = { foo: 'bar' };
+
+  var module = function(module, exports, require) {
+    module.exports = testExports;
+  }
+
+  var modRequire = function(module, exports, require) {
+    module.exports = require('foo.js');
+  }
 
   // 
   // Path utilities
@@ -32,24 +40,33 @@ Test.file('require.js', function() {
     done();
   });
 
-  Test.test('Require.require should return a module given a path', function(done) {
-    Test.assert(Require.require('func.js') === func);
+  Test.test('Require.require should return module.exports given a path', function(done) {
+    Require.define('module.js', module);
+    Test.assert(Require.require('module.js') === testExports);
 
     done();
   });
 
   Test.test('Require.require should resolve module paths', function(done) {
-    Require.define('foo/bar/baz.js', func);
-    Test.assert(Require.require('foo/./bar/../bar/baz.js') === func);
+    Require.define('foo/bar/baz.js', module);
+    Test.assert(Require.require('foo/./bar/../bar/baz.js') === testExports);
 
     done();
   });
 
   Test.test('Require.require should append index.js to folder paths', function(done) {
-    Require.define('foo/bar/index.js', func);
-    Test.assert(Require.require('foo/bar') === func);
-    Test.assert(Require.require('foo/bar/') === func);
+    Require.define('foo/bar/index.js', module);
+    Test.assert(Require.require('foo/bar') === testExports);
+    Test.assert(Require.require('foo/bar/') === testExports);
 
+    done();
+  });
+
+  Test.test('Modules should have a require function that resolves from its root', function(done) {
+    Require.define('foo/module.js', modRequire);
+    Require.define('foo/foo.js', module);
+
+    Test.assert(Require.require('foo/module.js') === testExports);
     done();
   });
 });
