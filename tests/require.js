@@ -1,5 +1,5 @@
 var Test = require('../lib/test.js');
-var Require = require('../lib/require.js');
+var Require = require('../boot/require.js');
 
 Test.file('require.js', function() {
   var func = function() { funcCalled = true };
@@ -12,26 +12,6 @@ Test.file('require.js', function() {
   var modRequire = function(module, exports, require) {
     module.exports = require('foo.js');
   }
-
-  // 
-  // Path utilities
-  //
-
-  Test.test('Path.extension should return the file extension of a file path', function(done) {
-    Test.assert(Require.Path.extension('foo/bar/test.js') == 'js');
-
-    done();
-  });
-
-  Test.test('Path.resolve should resolve all ".."s and "."s in a path given a root path', function(done) {
-    Test.assert(Require.Path.resolve('1/2/3', 'foo/../bar/./baz') == '1/2/3/bar/baz');
-
-    done();
-  });
-
-  // 
-  // Module definition and loading
-  //
 
   Test.test('Require.define should add a module to Require.modules', function(done) {
     Require.define('func.js', func);
@@ -65,8 +45,20 @@ Test.file('require.js', function() {
   Test.test('Modules should have a require function that resolves from its root', function(done) {
     Require.define('foo/module.js', modRequire);
     Require.define('foo/foo.js', module);
-
     Test.assert(Require.require('foo/module.js') === testExports);
+
+    done();
+  });
+
+  Test.test('Require.wrapModule should wrap a require header around a function or string', function(done) {
+    var body = 'module.exports = "foo"';
+    var wrapped = Require.wrapModule('wrap.js', body); 
+    Test.assert(wrapped.indexOf("Require.define('wrap.js'") != -1);
+    Test.assert(wrapped.indexOf(body) != -1);
+    // run the Require.define(...)
+    eval(wrapped);
+    Test.assert(Require.require('wrap.js') == 'foo');
+
     done();
   });
 });

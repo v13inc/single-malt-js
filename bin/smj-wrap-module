@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var Require = require('../boot/require.js');
+
+var files = process.argv.slice(2);
+
+files.forEach(function(file) {
+  var contents = fs.readFileSync(file);
+  console.log(Require.wrapModule(file, contents));
+});

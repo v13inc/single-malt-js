@@ -5,7 +5,7 @@ var Test = require('../lib/test');
 var files = process.argv.slice(2);
 
 files.forEach(function(testFile) {
-  var testFile = require(testFile); // test files will run Tests.define
+  var test = require(testFile); // test files will run Tests.define
 });
 
 Test.run();
