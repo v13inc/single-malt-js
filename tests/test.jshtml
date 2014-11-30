@@ -1,0 +1,9 @@
+<%
+  var foo = 'bar';
+  var func = function(one) { return one + ' two' };
+%>
+<div>
+  <h1>{{ foo }}</h1>
+  <h2>{{ state.foo }}</h2>
+  <h2>{{ func(state.one) }}</h2>
+</div>
